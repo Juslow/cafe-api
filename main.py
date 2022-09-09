@@ -4,13 +4,13 @@ import random
 
 app = Flask(__name__)
 
-##Connect to Database
+# Connect to Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-##Cafe TABLE Configuration
+# Cafe TABLE Configuration
 class Cafe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)
@@ -67,6 +67,25 @@ def get_all_cafes():
                            "coffee_price": cafe.coffee_price, } for cafe in all_cafes])
 
 
+@app.route("/random", methods=['GET'])
+def get_random_cafe():
+    cafes = db.session.query(Cafe).all()
+    random_cafe = random.choice(cafes)
+    return jsonify(cafe={
+        "id": random_cafe.id,
+        "name": random_cafe.name,
+        "map_url": random_cafe.map_url,
+        "img_url": random_cafe.img_url,
+        "location": random_cafe.location,
+        "seats": random_cafe.seats,
+        "has_toilet": random_cafe.has_toilet,
+        "has_wifi": random_cafe.has_wifi,
+        "has_sockets": random_cafe.has_sockets,
+        "can_take_calls": random_cafe.can_take_calls,
+        "coffee_price": random_cafe.coffee_price,
+    })
+
+
 # HTTP POST - Create Record
 @app.route("/add", methods=['POST'])
 def add_new_cafe():
@@ -86,25 +105,6 @@ def add_new_cafe():
     db.session.add(new_cafe)
     db.session.commit()
     return jsonify(response={"success": "Successfully added the new cafe."})
-
-
-@app.route("/random", methods=['GET'])
-def get_random_cafe():
-    cafes = db.session.query(Cafe).all()
-    random_cafe = random.choice(cafes)
-    return jsonify(cafe={
-        "id": random_cafe.id,
-        "name": random_cafe.name,
-        "map_url": random_cafe.map_url,
-        "img_url": random_cafe.img_url,
-        "location": random_cafe.location,
-        "seats": random_cafe.seats,
-        "has_toilet": random_cafe.has_toilet,
-        "has_wifi": random_cafe.has_wifi,
-        "has_sockets": random_cafe.has_sockets,
-        "can_take_calls": random_cafe.can_take_calls,
-        "coffee_price": random_cafe.coffee_price,
-    })
 
 
 # HTTP PUT/PATCH - Update Record
